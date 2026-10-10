@@ -1,0 +1,31 @@
+# Go
+/bin/
+/pkg/
+*.test
+
+# Android
+.gradle/
+/local.properties
+/.idea/
+build/
+app/build/
+*.iml
+*.hprof
+
+# Secrets — never commit
+*.keystore
+*.jks
+*.pem
+*.key
+.env
+*.env
+config/*.yaml
+!config/*.example.yaml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
