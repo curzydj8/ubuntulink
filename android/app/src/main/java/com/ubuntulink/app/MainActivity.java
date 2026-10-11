@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -42,6 +43,9 @@ public class MainActivity extends Activity {
     private ScrollView monitorContainer;
     private TextView monitorText;
     private TextView desktopStatus;
+    private ImageView desktopView;
+    private TextView desktopPlaceholder;
+    private MjpegPlayer mjpegPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,11 +64,23 @@ public class MainActivity extends Activity {
         monitorContainer = findViewById(R.id.monitor_container);
         monitorText = findViewById(R.id.monitor_text);
         desktopStatus = findViewById(R.id.desktop_status);
+        desktopView = findViewById(R.id.desktop_view);
+        desktopPlaceholder = findViewById(R.id.desktop_placeholder);
 
         findViewById(R.id.btn_split).setOnClickListener(v -> setMode(MODE_SPLIT));
         findViewById(R.id.btn_full_desktop).setOnClickListener(v -> setMode(MODE_DESKTOP));
         findViewById(R.id.btn_full_monitor).setOnClickListener(v -> setMode(MODE_MONITOR));
         findViewById(R.id.btn_unpair).setOnClickListener(v -> onUnpair());
+
+        // Start MJPEG desktop stream (read-only viewing).
+        mjpegPlayer = new MjpegPlayer(desktopView);
+        mjpegPlayer.start(prefs.getBaseUrl() + "/api/v1/desktop/stream", prefs.getToken(),
+                (connected, message) -> {
+                    desktopStatus.setText(message);
+                    if (connected) {
+                        desktopPlaceholder.setVisibility(View.GONE);
+                    }
+                });
 
         executor = Executors.newSingleThreadExecutor();
         handler = new Handler(Looper.getMainLooper());
@@ -113,10 +129,7 @@ public class MainActivity extends Activity {
             try {
                 JSONObject snap = ApiClient.getMonitor(baseUrl, token);
                 final String text = formatSnapshot(snap);
-                runOnUiThread(() -> {
-                    monitorText.setText(text);
-                    desktopStatus.setText("● 已连接");
-                });
+                runOnUiThread(() -> monitorText.setText(text));
             } catch (ApiClient.AuthException e) {
                 // Token dead: back to pairing.
                 runOnUiThread(() -> {
@@ -129,7 +142,6 @@ public class MainActivity extends Activity {
                 final String msg = e.getMessage();
                 runOnUiThread(() -> {
                     monitorText.setText("连接失败: " + msg + "\n\n5 秒后重试…");
-                    desktopStatus.setText("○ 未连接");
                 });
             }
         });
@@ -248,6 +260,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mjpegPlayer != null) {
+            mjpegPlayer.stop();
+        }
         if (handler != null) {
             handler.removeCallbacks(pollTask);
         }
