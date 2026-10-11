@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Top: live desktop (Phase 4: video stream). Read-only, no input. -->
+    <FrameLayout
+        android:id="@+id/desktop_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#000000">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/desktop_placeholder"
+            android:textColor="#888888"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/desktop_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:padding="8dp"
+            android:text=""
+            android:textColor="#00FF88"
+            android:textSize="12sp" />
+
+    </FrameLayout>
+
+    <!-- Bottom: monitoring panel -->
+    <ScrollView
+        android:id="@+id/monitor_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#111111">
+
+        <TextView
+            android:id="@+id/monitor_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:text="@string/status_connecting"
+            android:textColor="#E0E0E0"
+            android:textSize="14sp"
+            android:fontFamily="monospace" />
+
+    </ScrollView>
+
+    <!-- Controls -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#222222"
+        android:padding="4dp">
+
+        <Button
+            android:id="@+id/btn_split"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_split"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btn_full_desktop"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_full_desktop"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btn_full_monitor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_full_monitor"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/btn_unpair"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/btn_unpair"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+</LinearLayout>
