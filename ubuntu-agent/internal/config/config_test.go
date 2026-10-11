@@ -47,3 +47,13 @@ func TestLoadBadJSON(t *testing.T) {
 		t.Fatal("expected error for bad JSON")
 	}
 }
+
+func TestDefaultsPhase2(t *testing.T) {
+	cfg, _ := Load("")
+	if cfg.Port != 38080 {
+		t.Fatalf("port = %d, want 38080", cfg.Port)
+	}
+	if cfg.PairCodeTTLSeconds != 300 || cfg.PairMaxAttempts != 5 || cfg.PairLockSeconds != 300 {
+		t.Fatalf("pair defaults wrong: %+v", cfg)
+	}
+}
