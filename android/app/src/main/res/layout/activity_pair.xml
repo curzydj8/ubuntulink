@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/pair_title"
+        android:textSize="22sp"
+        android:layout_marginBottom="24dp" />
+
+    <EditText
+        android:id="@+id/et_ip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_ip"
+        android:inputType="text"
+        android:layout_marginBottom="8dp" />
+
+    <Button
+        android:id="@+id/btn_discover"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_discover"
+        android:layout_marginBottom="16dp" />
+
+    <EditText
+        android:id="@+id/et_code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_code"
+        android:inputType="number"
+        android:maxLength="6"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/btn_pair"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_pair" />
+
+    <TextView
+        android:id="@+id/pair_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text=""
+        android:textSize="14sp" />
+
+</LinearLayout>
