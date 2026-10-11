@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/curzydj8/ubuntulink/ubuntu-agent/internal/auth"
+	"github.com/curzydj8/ubuntulink/ubuntu-agent/internal/desktop"
 	"github.com/curzydj8/ubuntulink/ubuntu-agent/internal/monitor"
 	"github.com/curzydj8/ubuntulink/ubuntu-agent/internal/pairing"
 	"github.com/curzydj8/ubuntulink/ubuntu-agent/internal/version"
@@ -21,16 +22,27 @@ type Server struct {
 	auth      *auth.Auth
 	deviceID  string
 	mux       *http.ServeMux
+	streamer  *desktop.Streamer
 }
 
 func New(collector *monitor.Collector, p *pairing.Pairing, a *auth.Auth, deviceID string) *Server {
-	s := &Server{collector: collector, pairing: p, auth: a, deviceID: deviceID, mux: http.NewServeMux()}
+	s := &Server{
+		collector: collector,
+		pairing:   p,
+		auth:      a,
+		deviceID:  deviceID,
+		mux:       http.NewServeMux(),
+		// Phase 4: test pattern source. PortalSource replaces this
+		// once validated in a graphical session.
+		streamer: desktop.NewStreamer(desktop.NewTestPatternSource(960, 540), 5),
+	}
 	s.mux.HandleFunc("GET /healthz", s.handleHealthz)
 	s.mux.HandleFunc("GET /api/v1/info", s.handleInfo)
 	s.mux.HandleFunc("POST /api/v1/pair", s.handlePair)
 	s.mux.HandleFunc("GET /api/v1/monitor", s.requireAuth(s.handleMonitor))
 	s.mux.HandleFunc("POST /api/v1/unpair", s.requireAuth(s.handleUnpair))
 	s.mux.HandleFunc("GET /api/v1/peers", s.requireAuth(s.handlePeers))
+	s.mux.HandleFunc("GET /api/v1/desktop/stream", s.requireAuth(s.streamer.ServeHTTP))
 	return s
 }
 
