@@ -1,7 +1,7 @@
 package version
 
-// Phase 1 baseline.
+// Phase 2: pairing + authenticated HTTP API.
 const (
 	AppName = "ubuntulink-agent"
-	Version = "0.1.0"
+	Version = "0.2.0"
 )
