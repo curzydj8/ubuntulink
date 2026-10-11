@@ -1,5 +1,7 @@
-// Command ubuntulink-agent collects real system metrics and prints them
-// as JSON snapshots. Phase 1: local collection only, no network server.
+// Command ubuntulink-agent: UbuntuLink device agent.
+//
+// Phase 2: HTTP API with pairing-code authorization and Bearer tokens.
+// Read-only: monitoring snapshots and (later) desktop viewing; no remote operation.
 package main
 
 import (
@@ -9,20 +11,32 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
+	"github.com/curzydj8/ubuntulink/ubuntu-agent/internal/auth"
 	"github.com/curzydj8/ubuntulink/ubuntu-agent/internal/config"
+	"github.com/curzydj8/ubuntulink/ubuntu-agent/internal/identity"
 	"github.com/curzydj8/ubuntulink/ubuntu-agent/internal/monitor"
+	"github.com/curzydj8/ubuntulink/ubuntu-agent/internal/pairing"
+	"github.com/curzydj8/ubuntulink/ubuntu-agent/internal/server"
 	"github.com/curzydj8/ubuntulink/ubuntu-agent/internal/version"
 )
 
+func stateDir() string {
+	if h, err := os.UserHomeDir(); err == nil {
+		return filepath.Join(h, ".config", "ubuntulink")
+	}
+	return filepath.Join(".", ".ubuntulink")
+}
+
 func main() {
 	var (
-		cfgPath  = flag.String("config", "", "path to JSON config file (optional)")
-		interval = flag.Int("interval", 0, "collection interval seconds (overrides config)")
-		once     = flag.Bool("once", false, "collect a single snapshot and exit")
-		showVer  = flag.Bool("version", false, "print version and exit")
+		cfgPath = flag.String("config", "", "path to JSON config file (optional)")
+		port    = flag.Int("port", 0, "listen port (overrides config)")
+		once    = flag.Bool("once", false, "print one monitor snapshot and exit (debug)")
+		showVer = flag.Bool("version", false, "print version and exit")
 	)
 	flag.Parse()
 
@@ -39,44 +53,63 @@ func main() {
 		slog.Error("failed to load config", "err", err)
 		os.Exit(1)
 	}
-	if *interval > 0 {
-		cfg.IntervalSeconds = *interval
+	if *port > 0 {
+		cfg.Port = *port
 	}
-	slog.Info("starting", "app", version.AppName, "version", version.Version,
-		"interval_s", cfg.IntervalSeconds)
+
+	dir := stateDir()
+
+	devID, err := identity.LoadOrCreate(dir)
+	if err != nil {
+		slog.Error("failed to load device identity", "err", err)
+		os.Exit(1)
+	}
+
+	p := pairing.New(
+		time.Duration(cfg.PairCodeTTLSeconds)*time.Second,
+		cfg.PairMaxAttempts,
+		time.Duration(cfg.PairLockSeconds)*time.Second,
+	)
+	authz, err := auth.New(dir)
+	if err != nil {
+		slog.Error("failed to load paired devices", "err", err)
+		os.Exit(1)
+	}
 
 	collector := monitor.NewCollector()
-	emit := func() {
-		snap := collector.Collect()
-		out, err := json.Marshal(snap)
-		if err != nil {
-			slog.Error("failed to marshal snapshot", "err", err)
-			return
-		}
-		fmt.Println(string(out))
-	}
 
 	if *once {
-		// Prime deltas, then take the real sample.
 		collector.Collect()
 		time.Sleep(1100 * time.Millisecond)
-		emit()
+		snap := collector.Collect()
+		out, _ := json.Marshal(snap)
+		fmt.Println(string(out))
 		return
 	}
 
+	srv := server.New(collector, p, authz, devID.DeviceID)
+
+	slog.Info("starting",
+		"app", version.AppName,
+		"version", version.Version,
+		"device_id", devID.DeviceID,
+		"port", cfg.Port,
+		"paired_devices", len(authz.List()),
+	)
+	// The pairing code is the user-visible secret for authorizing a new phone.
+	// It is short-lived and single-use.
+	slog.Info("pairing code (valid 5m, single-use)", "code", p.Code())
+
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigCh
+		slog.Info("shutting down")
+		os.Exit(0)
+	}()
 
-	ticker := time.NewTicker(time.Duration(cfg.IntervalSeconds) * time.Second)
-	defer ticker.Stop()
-	emit()
-	for {
-		select {
-		case <-ticker.C:
-			emit()
-		case sig := <-sigCh:
-			slog.Info("shutting down", "signal", sig.String())
-			return
-		}
+	if err := srv.Serve(fmt.Sprintf(":%d", cfg.Port)); err != nil {
+		slog.Error("server stopped", "err", err)
+		os.Exit(1)
 	}
 }
