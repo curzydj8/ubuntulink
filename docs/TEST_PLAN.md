@@ -68,6 +68,28 @@
 - 状态：**已实现，未验证**——真机安装与联调待用户完成。
 - 诚实标记：桌面为占位（阶段 4 接视频流）；Room/Keystore 延期（文档已记）。
 
+## 阶段 4 测试记录（2026-10-11）
+
+**技术调查**（诚实记录）：
+- xdg-desktop-portal ScreenCast 为 Wayland 官方路径，需用户点选授权框
+- GNOME Screenshot D-Bus 被策略拒绝（`Screenshot is not allowed`）
+- GStreamer 有 pipewiresrc+jpegenc，无 H.264 编码器；Go 模块代理不通（只能标准库）
+- 结论：流格式选 MJPEG（jpegenc 可用、Android 原生解、无需协商）
+
+**实现**：
+- `internal/desktop/`：MJPEG 流（`multipart/x-mixed-replace`）+ 可插拔 CaptureSource；
+  Phase 4 用 TestPatternSource（时间戳测试图，`image/jpeg` 标准库生成）
+- `GET /api/v1/desktop/stream`（需认证）：无 token→401；有 token→200 MJPEG 流（curl 验证）
+- Android `MjpegPlayer`：SOI/EOI 解析 + BitmapFactory 解码 + ImageView 显示
+- `go test ./internal/desktop/`：2 项通过
+
+**未验证**（诚实标记）：
+- 真实桌面捕获：portal 需用户图形会话 + 点选授权，Runner 无法完成；
+  PortalSource 为后续工作，`docs/DESKTOP_STREAMING.md` 有完整设计与测试步骤
+- Android 真机显示：待用户安装 v0.4.0 测试
+
+**状态：已实现，未验证**（流链路已验证，真实捕获待用户会话）
+
 ## 后续阶段测试占位
 
 - 阶段 1：`go build ./...`、`go test ./...`、本机运行数据交叉验证记录。
