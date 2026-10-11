@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Top: live desktop (Phase 4: video stream). Read-only, no input. -->
+    <!-- Top: live desktop (MJPEG stream). Read-only, no input. -->
     <FrameLayout
         android:id="@+id/desktop_container"
         android:layout_width="match_parent"
@@ -12,7 +12,15 @@
         android:layout_weight="1"
         android:background="#000000">
 
+        <ImageView
+            android:id="@+id/desktop_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:background="#000000" />
+
         <TextView
+            android:id="@+id/desktop_placeholder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
