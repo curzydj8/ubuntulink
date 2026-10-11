@@ -42,6 +42,21 @@
   - temp：acpitz 27.8/29.8°C、x86_pkg_temp 34.0°C（/sys 可读）
 - 结论：阶段 1 验收通过。GitHub `curzydj8/ubuntulink` 已同步 24 文件。
 
+## 阶段 2 测试记录（2026-10-11）
+
+- `go build`、`go vet`、`go test ./...`：26 项全过（config 5、monitor 8、pairing 5、auth 4、server 4）。
+  途中修 1 个真 bug：`PairedDevice.TokenHash` 的 json tag 为 `"-"` 导致持久化丢失，重载后 token 失效。
+- 真机 curl 全流程（127.0.0.1:38080，单次 Runner 调用内完成）：
+  - `GET /healthz` → 200 `{"status":"ok","version":"0.2.0"}`
+  - `GET /api/v1/info` → 200（device_id / version / paired_count）
+  - `GET /api/v1/monitor` 无 token → 401
+  - `POST /api/v1/pair` 错码 → 401；正确码 → 200 + 64 字符 token
+  - `GET /api/v1/monitor` 带 token → 200（真实 Snapshot）
+  - `GET /api/v1/peers` → 列出已配对设备（不含 token 材料）
+  - `POST /api/v1/unpair` → 200；撤销后 token 调 monitor → 401
+- 结论：阶段 2 验收通过。配对码 6 位/5 分钟/单次使用/5 次锁定；token 为 256-bit 随机，
+  服务端只存 SHA-256，0600 文件持久化。
+
 ## 后续阶段测试占位
 
 - 阶段 1：`go build ./...`、`go test ./...`、本机运行数据交叉验证记录。
