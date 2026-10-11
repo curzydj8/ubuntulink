@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">UbuntuLink</string>
+    <string name="desktop_placeholder">实时桌面\n（阶段 4 接入视频流）</string>
+    <string name="btn_full_desktop">全屏桌面</string>
+    <string name="btn_full_monitor">完整监控</string>
+    <string name="btn_split">分屏</string>
+    <string name="btn_unpair">取消配对</string>
+    <string name="btn_pair">配对</string>
+    <string name="btn_discover">自动发现</string>
+    <string name="hint_ip">Agent 地址（如 100.105.107.86）</string>
+    <string name="hint_code">6 位配对码</string>
+    <string name="pair_title">配对 Ubuntu</string>
+    <string name="status_connecting">连接中…</string>
+</resources>
