@@ -8,7 +8,7 @@ SDK="$HOME/Android/Sdk"
 BT="$SDK/build-tools/35.0.0"
 PLATFORM="$SDK/platforms/android-35"
 APP_ID="com.ubuntulink.app"
-VERSION="0.3.0"
+VERSION="0.4.0"
 
 # Debug keystore (local only, never commit).
 KS="ubuntulink-debug.keystore"
