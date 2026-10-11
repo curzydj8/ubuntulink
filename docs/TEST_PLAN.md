@@ -26,6 +26,22 @@
 
 结论：阶段 0 检查通过。Go 缺失为阶段 1 前置安装项；其余工具链就绪。
 
+## 阶段 1 测试记录（2026-10-11）
+
+- Go 1.26.0 经 `sudo apt install -y golang` 安装（用户批准）。
+- `go build ./...`、`go vet ./...` 一次通过；`go test ./...` 12 项全过
+ （config 4、monitor 8；途中修 1 个测试用例 bug：TestParseNetDevShort 的输入不够短）。
+- `/tmp/agent -once` 真实采集（JSON）：
+  - system：Ubuntu 26.04.1 LTS，kernel 7.0.0-38-generic，uptime 正常
+  - cpu：8.9%，4 核，2138.5 MHz（与 /proc/cpuinfo 一致）
+  - mem：3292MB total / 2203MB avail / 33.1%（与 `free -m` 一致）
+  - disk /：usage 35.5%（与 `df -B1` 的 used/avail 字节数 1MB 内一致；途中修 2 个口径 bug：
+    先后把保留块算入分母、把 Bavail 当 Bfree 用，现与 df 完全对齐）
+  - net：enp2s0/tailscale0/docker0，operstate 如实上报
+  - gpu：`unavailable`（驱动未暴露计数器；设备已检出，不伪造数字）
+  - temp：acpitz 27.8/29.8°C、x86_pkg_temp 34.0°C（/sys 可读）
+- 结论：阶段 1 验收通过。GitHub `curzydj8/ubuntulink` 已同步 24 文件。
+
 ## 后续阶段测试占位
 
 - 阶段 1：`go build ./...`、`go test ./...`、本机运行数据交叉验证记录。
