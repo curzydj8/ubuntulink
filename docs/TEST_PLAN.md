@@ -57,6 +57,17 @@
 - 结论：阶段 2 验收通过。配对码 6 位/5 分钟/单次使用/5 次锁定；token 为 256-bit 随机，
   服务端只存 SHA-256，0600 文件持久化。
 
+## 阶段 3 测试记录（2026-10-11）
+
+- 语言：Java（无 kotlinc；手动 aapt2 流程已验证，文档化偏离）。
+- `build.sh`：aapt2 compile→link→javac→d8→zip→zipalign→apksigner，一次通过
+  （途中修 1 处：manifest 补 `package` 属性）。
+- APK：`ubuntulink-v0.3.0.apk`（25,458 bytes），`apksigner verify` 通过；
+  `aapt2 dump badging` 确认包名 `com.ubuntulink.app`、权限 INTERNET。
+- ApiClient 配对/轮询/撤销逻辑与阶段 2 的 curl 验证一致。
+- 状态：**已实现，未验证**——真机安装与联调待用户完成。
+- 诚实标记：桌面为占位（阶段 4 接视频流）；Room/Keystore 延期（文档已记）。
+
 ## 后续阶段测试占位
 
 - 阶段 1：`go build ./...`、`go test ./...`、本机运行数据交叉验证记录。
