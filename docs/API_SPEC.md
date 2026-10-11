@@ -36,6 +36,10 @@ Body: `{"code":"123456","client_id":"…","client_name":"…"}`
 ### GET /api/v1/peers
 `{"peers":[{"client_id":"…","client_name":"…","paired_at":"…"}]}`（不含 token 材料）。
 
+### GET /api/v1/desktop/stream
+MJPEG 视频流（需认证）。`Content-Type: multipart/x-mixed-replace; boundary=frame`，
+每帧为 JPEG。Phase 4 为测试图案源；portal 真实捕获接入后为实时桌面。
+
 ## 错误体
 `{"error_code":"…","error":"…"}`
 
