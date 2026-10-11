@@ -1,7 +1,7 @@
 package version
 
-// Phase 2: pairing + authenticated HTTP API.
+// Phase 4: MJPEG desktop streaming prototype.
 const (
 	AppName = "ubuntulink-agent"
-	Version = "0.2.0"
+	Version = "0.4.0"
 )
