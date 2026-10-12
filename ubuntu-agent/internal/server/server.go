@@ -43,6 +43,9 @@ func New(collector *monitor.Collector, p *pairing.Pairing, a *auth.Auth, deviceI
 	s.mux.HandleFunc("POST /api/v1/unpair", s.requireAuth(s.handleUnpair))
 	s.mux.HandleFunc("GET /api/v1/peers", s.requireAuth(s.handlePeers))
 	s.mux.HandleFunc("GET /api/v1/desktop/stream", s.requireAuth(s.streamer.ServeHTTP))
+	// Public read-only dashboard (no auth): static page + metrics JSON.
+	s.mux.HandleFunc("GET /dashboard", s.handleDashboard)
+	s.mux.HandleFunc("GET /api/v1/dashboard/metrics", s.handleDashboardMetrics)
 	return s
 }
 
